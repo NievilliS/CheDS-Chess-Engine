@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
     unsigned int ct = 1;
     ui8 vl = 1;
 
-    #define bufmax 50
+    #define bufmax 200
     char buf[bufmax] = {0};
 
     while(buf[0] != 'x' && buf[0] != 'X') {
@@ -124,7 +124,6 @@ int main(int argc, char **argv) {
         }
 
         ret = Board_apply(&board, m);
-        printf("\nBro: %i\n", ret);
         if(ret == 0 || ret == 3 || ret == 4) {
             printf("\n====================\nErr code: %u", ret);
             continue;

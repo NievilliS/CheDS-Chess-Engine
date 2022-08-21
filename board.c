@@ -529,8 +529,8 @@ ui8 Board_apply(Board_t *board, BoardMove_t move) {
     if(legal == 6) {
         ui8 piecerook = board->content[move.to_file][move.to_rank];
         board->content[move.to_file][move.to_rank] = CB_EMPTY;
-        board->META_CASTLE_A &= ~curcol;
-        board->META_CASTLE_H &= ~curcol;
+        board->META_CASTLE_A &= ~(3-curcol);
+        board->META_CASTLE_H &= ~(3-curcol);
         board->content[CB_FILE_C][move.to_rank] = piece;
         board->content[CB_FILE_D][move.to_rank] = piecerook;
         swret 6;
@@ -539,8 +539,8 @@ ui8 Board_apply(Board_t *board, BoardMove_t move) {
     if(legal == 7) {
         ui8 piecerook = board->content[move.to_file][move.to_rank];
         board->content[move.to_file][move.to_rank] = CB_EMPTY;
-        board->META_CASTLE_A &= ~curcol;
-        board->META_CASTLE_H &= ~curcol;
+        board->META_CASTLE_A &= ~(3-curcol);
+        board->META_CASTLE_H &= ~(3-curcol);
         board->content[CB_FILE_G][move.to_rank] = piece;
         board->content[CB_FILE_F][move.to_rank] = piecerook;
         swret 7;
@@ -549,16 +549,16 @@ ui8 Board_apply(Board_t *board, BoardMove_t move) {
     //Step 3: King's or Rook's move clearing meta castle flag
     //King resets flags for both
     if((piece & ~(CB_WHITE_MASK | CB_BLACK_MASK)) == CB_KING) {
-        board->META_CASTLE_A &= ~curcol;
-        board->META_CASTLE_H &= ~curcol;
+        board->META_CASTLE_A &= ~(3-curcol);
+        board->META_CASTLE_H &= ~(3-curcol);
     }
     //Rook A resets A flag
-    if((piece & ~(CB_WHITE_MASK | CB_BLACK_MASK)) == CB_ROOK && move.from_file == CB_FILE_A) {
-        board->META_CASTLE_A &= ~curcol;
+    if((piece & ~(CB_WHITE_MASK | CB_BLACK_MASK)) == CB_ROOK) {
+        board->META_CASTLE_A &= ~(3-curcol);
     }
     //and Rook H resets H flag
-    if((piece & ~(CB_WHITE_MASK | CB_BLACK_MASK)) == CB_ROOK && move.from_file == CB_FILE_H) {
-        board->META_CASTLE_H &= ~curcol;
+    if((piece & ~(CB_WHITE_MASK | CB_BLACK_MASK)) == CB_ROOK) {
+        board->META_CASTLE_H &= ~(3-curcol);
     }
 
     //Step 4: Check Pawn double rank and set en passant flag
@@ -958,7 +958,7 @@ ui8 Board_translate_expression(Board_t board, BoardMove_t *move, char literal[])
                 }
             }
         }
-
+        
         //Check if pieces were able to perform this
         if(file == 8) return 3;
 
@@ -1022,8 +1022,27 @@ ui8 Board_translate_expression(Board_t board, BoardMove_t *move, char literal[])
 
     //Castle king's side
     else if(Tool_Expression_Match(literal, "0-0")) {
-        ui8 rank = (board.turn == CB_TURN_WHITE) ? 0 : 7;
-        ui8 file = CB_FILE_E;
+        //Literally just convert and do this lmao
+        literal[0] = 'K';
+        literal[1] = 'H';
+        literal[2] = '8';
+        if(board.turn == CB_TURN_WHITE)
+            literal[2] = '1';
+
+        return Board_translate_expression(board, move, literal);
+    }
+
+    //Castle queen's side
+    else if(Tool_Expression_Match(literal, "0-0-0")) {
+        //Literally just convert and do this lmao
+        literal[0] = 'K';
+        literal[1] = 'A';
+        literal[2] = '8';
+        literal[3] = 0;
+        if(board.turn == CB_TURN_WHITE)
+            literal[2] = '1';
+
+        return Board_translate_expression(board, move, literal);
     }
 
     return 4;

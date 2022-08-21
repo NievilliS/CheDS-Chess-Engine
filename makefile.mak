@@ -15,8 +15,12 @@ SRCS := board.c main.c
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 # Final Step: Compile to output
-$(OUTPUT_PATH): $(OBJS)
+$(OUTPUT_PATH): $(BUILD_DIR) $(OBJS)
 	$(CXX) $(OBJS) -o $(OUTPUT_PATH) $(LIBRARIES_INCLUDE:%=-%)
+
+# Makedir Build Dir
+$(BUILD_DIR):
+	mkdir $(BUILD_DIR)
 
 # Generic C compilation
 $(BUILD_DIR)/%.c.o: %.c
