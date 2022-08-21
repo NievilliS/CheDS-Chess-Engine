@@ -65,7 +65,7 @@ void dout(Board_t b) {
     }
 }*/
 
-int main(int argc, char **argv) {
+int main() {
     Board_t board;
 
     /*for(ui8 f = 0; f < 8; f++) for(ui8 r = 0; r < 8; r++) board.content[f][r] = CB_EMPTY;

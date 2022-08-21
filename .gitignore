@@ -1,3 +1,4 @@
 *.exe
+!release/*/*.exe
 build
 .vscode
