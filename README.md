@@ -52,6 +52,8 @@ ___
 
 ## Compilation
 
+The makefile I use compiles to both win32 and linux files. Sooo, if you want to exclusively compiles to only one of the two, you'll have to take care of that by yourself.
+
 Depending on your compiler, you might have to change the CC, CXX variables in makefile.mak.
 I used the MinGW32 compiler from Code::Blocks (without actually using Code::Blocks lol).
 
@@ -59,7 +61,7 @@ Compiler should follow this syntax:
 
 ``gcc -c file.c -o file.o``
 
-You should not have to change any further settings other than OUTPUT_PATH, which currently outputs as "o.exe" and SRCS incase of additions, etc.
+You should not have to change any further settings other than OUTPUT_PATH, which currently outputs as "output.exe" and SRCS incase of additions, etc.
 
 ___
 

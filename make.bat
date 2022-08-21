@@ -1,1 +1,1 @@
-mingw32-make %1 
+mingw32-make %1 %2
