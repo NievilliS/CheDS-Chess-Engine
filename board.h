@@ -14,6 +14,7 @@
 #define _CHEDS_BOARD_H_
 
     /***** DEFINES *****/
+    #define CB_VERSION "1_0_1"
 
     /**** CHEDS BOARD PIECE TYPE CONSTANT ****/
     #define CB_EMPTY (0)          /* Empty specifier for board */
@@ -68,16 +69,22 @@
     } BoardMove_t;
 
     /***** GLOBAL METHOD DECLARATIONS *****/
-    void Board_init_default(Board_t *);              /* Default board placement initializer */
-    void Board_init(Board_t *);                      /* This gets called in main though */
-    ui8 Board_legal_move(Board_t, BoardMove_t);      /* Checks if legal move */
-    ui8 Board_color_field(Board_t, ui8, ui8);        /* Gets a field's color */
-    ui8 Board_defended_field(Board_t, ui8, ui8);     /* Checks if a field is defended by both colors */
-    ui8 Tool_Expression_Match(char *, const char *);       /* Arithmetic chess "regex" matcher */
-    ui8 Board_translate_expression(Board_t, BoardMove_t *, char *);    /* Translate expression to move */
-    ui8 Board_apply(Board_t *, BoardMove_t);         /* Applies move to board */
-    ui8 Board_in_check(Board_t, ui8);                /* Checks of the color is in check */
-    void Board_clone(Board_t *, Board_t);            /* Clones */
-    ui8 Board_in_mate(Board_t, ui8);                /* Evaluates if the game is lost */
+    void Board_init_default(Board_t *);                                 /* Default board placement initializer */
+    void Board_init(Board_t *);                                         /* This gets called in main though */
+    ui8 Board_legal_move(Board_t, BoardMove_t);                         /* Checks if legal move */
+    ui8 Board_color_field(Board_t, ui8, ui8);                           /* Gets a field's color */
+    ui8 Board_defended_field(Board_t, ui8, ui8);                        /* Checks if a field is defended by both colors */
+    ui8 Tool_Expression_Match(char *, const char *);                    /* Arithmetic chess "regex" matcher */
+    ui8 Tool_Match(char *, const char *, long);                         /* String matching tool, does not use expression format */
+    ui8 Board_translate_expression(Board_t, BoardMove_t *, char *);     /* Translate expression to move */
+    ui8 Board_apply(Board_t *, BoardMove_t);                            /* Applies move to board */
+    ui8 Board_in_check(Board_t, ui8);                                   /* Checks of the color is in check */
+    void Board_clone(Board_t *, Board_t);                               /* Clones */
+    ui8 Board_in_mate(Board_t, ui8);                                    /* Evaluates if the game is lost */
+
+    /***** GLOBAL FILE HANDLE DECLARATIONS *****/
+    ui8 Board_load_from_string(Board_t *, char *);                      /* Load a board from cstring */
+    ui8 Board_load_from_file(Board_t *, char *);                        /* Load a board from a path */
+    ui8 Board_save_to_file(Board_t, char *);                          /* Save board to a path */
 
 #endif
