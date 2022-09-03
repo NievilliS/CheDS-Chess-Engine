@@ -12,8 +12,7 @@
 
 /***** INCLUDES *****/
 #include "board.h"
-#include "math.h"
-#include <stdio.h>
+#include <math.h>
 
 /***** FUNCTIONALITY *****/
 
@@ -447,7 +446,23 @@ ui8 Board_color_field(Board_t board, ui8 file, ui8 rank) {
  */
 ui8 Board_apply(Board_t *board, BoardMove_t move) {
     //Swap tool
-    #define swret if(Board_in_check(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {Board_clone(board, backup); return 0;} board->turn = (board->turn == CB_TURN_WHITE) ? CB_TURN_BLACK : CB_TURN_WHITE; if(Board_in_mate(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {board->win = ((board->turn == CB_TURN_WHITE) ? 2 : 1); return ((board->turn == CB_TURN_WHITE) ? 126u : 125u);} return
+    #define swret                                                                                       \
+    /* If the applied move doesn't resolve or causes a check, the move can't be done */                 \
+    if(Board_in_check(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {                                \
+        Board_clone(board, backup);                                                                     \
+        return 0;                                                                                       \
+    }                                                                                                   \
+    /* Swap turn */                                                                                     \
+    board->turn = (board->turn == CB_TURN_WHITE) ? CB_TURN_BLACK : CB_TURN_WHITE;                       \
+    /* Check for checkmate */                                                                           \
+    if(Board_in_mate(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {                                 \
+        board->win = ((board->turn == CB_TURN_WHITE) ? 2 : 1);                                          \
+        return ((board->turn == CB_TURN_WHITE) ? 126u : 125u);                                          \
+    }                                                                                                   \
+    /* TODO: To check for stalemate                                                                     \
+    if(Board_in_stale(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {}                               \
+    */                                                                                                  \
+    return
 
     Board_t backup;
     Board_clone(&backup, *board);
@@ -627,7 +642,7 @@ ui8 Board_in_mate(Board_t board, ui8 color) {
         //Upon legal move
         ui8 ret = Board_apply(&check, move);
         if(!(ret == 0 || ret == 3 || ret == 4)) {
-            printf("\n<%i,%i,%i,%i>\n", move.from_file, move.from_rank, move.to_file, move.to_rank);
+            //printf("\n<%i,%i,%i,%i>\n", move.from_file, move.from_rank, move.to_file, move.to_rank);
             return 0;
         }
     }
@@ -660,7 +675,7 @@ void Board_clone(Board_t *into, Board_t from) {
 ui8 Tool_Expression_Match(char *literal, const char *match) {
 	char cl = literal[0];
 	char cm = match[0];
-	size_t ix = 1;
+	long ix = 1;
 
 	while(cl && cm) {
 
@@ -705,7 +720,7 @@ ui8 Tool_Expression_Match(char *literal, const char *match) {
 ui8 Board_translate_expression(Board_t board, BoardMove_t *move, char literal[]) {
 
 	//Caps-up literal
-	size_t ix = 0;
+	long ix = 0;
 	while(literal[ix]) {
 		if(literal[ix] >= 'a' && literal[ix] <= 'z')
 			literal[ix] -= 'a'-'A';
