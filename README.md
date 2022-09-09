@@ -24,7 +24,7 @@ In order to be able to do anything, you need the console syntax:
 - y - reset board
 
 ## Chess move notation
-But that's not all. You will have to use Chess Algebraic Notation, which is more deeply described in https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Castling .
+But that's not all. You will have to use Chess Algebraic Notation, which is more deeply described in https://en.wikipedia.org/wiki/Algebraic_notation_(chess) .
 
 The following examples might help you out a bit :)
 
@@ -35,7 +35,7 @@ The following examples might help you out a bit :)
 - 0-0 - Castle King-side
 - 0-0-0 - Castle Queen-side
 - f7xe=Q - White pawn at F7 captures at E8 and gets promoted to a Queen
-- RA4xb4 - Took at A4 captures piece at B4. Again, the 'x' is not necessary.
+- RA4xb4 - Rook at A4 captures piece at B4. Again, the 'x' is not necessary.
 
 White always starts and thus has a prefix such as "1.", "2.", ...
 
