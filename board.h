@@ -58,6 +58,7 @@
         ui8 win;                    /* Determines win position */
         ui8 META_CASTLE_H;          /* Enable flag for Castling King's side */
         ui8 META_PASSANT_FILE;      /* En Passant file, exact pawn is easily determined, the pawn remains on the same file and the flag applies for the person who now isn't in turn */
+        __UINT16_TYPE__ turn_nr;    /* The turn number */
     } Board_t;                      /* Board struct that stores pieces as indexes */
 
     typedef struct BoardMove_t_s {

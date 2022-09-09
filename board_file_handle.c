@@ -13,6 +13,7 @@
 /***** INCLUDES *****/
 #include "board.h"
 #include <math.h>
+#include <stdio.h>
 
 /***** VERSION ENCODERS DECLARATION *****/
 ui8 VER1_0_1(Board_t *board, char *str);
@@ -41,6 +42,206 @@ ui8 Board_load_from_string(Board_t *board, char *str)
     }
 
     return 0;
+}
+
+/** @fn ui8 Board_load_from_file(Board_t *board, char *path)
+ * @brief Load a board bin from path
+ * @param board Pointer to board to be initialized
+ * @param path Path to file
+ * @returns is successful: 1 | else: 0
+ */
+ui8 Board_load_from_file(Board_t *board, char *path) {
+    // File content into stack, processed by method above
+    char buffer[350] = {0};
+    FILE* file = fopen(path, "rb");
+    int res;
+
+    if(file == NULL) {
+        return 0;
+    }
+    
+    fread(buffer, sizeof(char), 350, file);
+
+    if(fclose(file)) {
+        return 0;
+    }
+
+    // Call method above
+    return Board_load_from_string(board, buffer);
+}
+
+/** @fn ui8 Board_save_to_file(Board_t board, char *path)
+ * @brief Save board content into path
+ * @param board Board to be saved
+ * @param path Path to file
+ * @returns is successful: 1 | else: 0
+ */
+ui8 Board_save_to_file(Board_t board, char *path)
+{
+    FILE* file = fopen(path, "wb");
+    int res;
+
+    // Saving as 1.0.1 file
+
+    /*
+     * ATTRIBUTE FORMATING FOR 1.0.1:
+     * ABBC CDDD
+     * DEFF 0000
+     * TTTT TTTT
+     * TTTT TTTT
+     * 
+     * A - Allow default special move flag
+     * B - Queen's side castling info
+     * C - King's side castling info
+     * D - Peasant File info
+     * E - Turn flag, 0 = white, 1 = black
+     * F - Win, 0 = ongoing game, 1 = white, 2 = black, 3 = draw
+     * T - Turn count number
+     */
+
+    /*
+     * CONTENT FORMATTING FOR 1.0.1:
+     * CCFF FRRRR
+     * 
+     * C - Command
+     * F - File
+     * R - Rank
+     * 
+     * Typically:
+     * 
+     * 01FF FRRR  ->  Set white piece
+     * 10FF FRRR  ->  Set black piece
+     * 11PP PPPP  ->  Set piece ID
+     * 00-- ----  ->  Exit
+     */
+
+    // Success at non-negative value
+    #define savecheck   \
+    if(res < 0)         \
+        return 0
+
+    // Values
+    const char *begin = "CHEDS" "\5" "1.0.1";
+
+    const unsigned char attr[4] = {
+        ((board.CB_ALLOW_DEFAULT_SPM & 0x01u) << 7) |
+        ((board.META_CASTLE_A & 0x03u) << 5)        |
+        ((board.META_CASTLE_H & 0x03u) << 3)        |
+        ((board.META_PASSANT_FILE & 0x0Eu) >> 1)    ,
+
+        ((board.META_PASSANT_FILE & 0x01u) << 7)    |
+        ((board.turn & 0x01u) << 6)                 |
+        ((board.win & 0x03u) << 4)                  ,
+
+        (ui8) (board.turn_nr >> 8)                  ,
+
+        (ui8) (board.turn_nr)                       ,
+    };
+
+    const unsigned char white_cmd = 0x40;
+    const unsigned char black_cmd = 0x80;
+
+    // Body data
+    ui8 f, r;
+    ui8 piece;
+    ui8 color;
+
+    // String buffers for all pieces
+    char str_pawns[66] =    {(0xC0u | (CB_PAWN & 0x3Fu))};
+    char str_rooks[66] =    {(0xC0u | (CB_ROOK & 0x3Fu))};
+    char str_knights[66] =  {(0xC0u | (CB_KNIGHT & 0x3Fu))};
+    char str_bishops[66] =  {(0xC0u | (CB_BISHOP & 0x3Fu))};
+    char str_queens[66] =   {(0xC0u | (CB_QUEEN & 0x3Fu))};
+    char str_kings[66] =    {(0xC0u | (CB_KING & 0x3Fu))};
+
+    int ind_pawns =     1;
+    int ind_rooks =     1;
+    int ind_knights =   1;
+    int ind_bishops =   1;
+    int ind_queens =    1;
+    int ind_kings =     1;
+
+    unsigned char out = 0x00u;
+
+    // Save all pieces into the string buffers
+    for(f = 0; f < 8; f++) for(r = 0; r < 8; r++) {
+        piece = (board.content[f][r]) & ~(CB_WHITE_MASK | CB_BLACK_MASK);
+        color = Board_color_field(board, f, r);
+
+        out =
+            ((color == 1) ? (white_cmd) : (black_cmd))  |
+            ((f & 0x07u) << 3)                          |
+            (r & 0x07u)                                 ;
+
+        switch(piece) {
+            case CB_PAWN:
+                str_pawns[ind_pawns++] = out;
+            break;
+            case CB_ROOK:
+                str_rooks[ind_rooks++] = out;
+            break;
+            case CB_KNIGHT:
+                str_knights[ind_knights++] = out;
+            break;
+            case CB_BISHOP:
+                str_bishops[ind_bishops++] = out;
+            break;
+            case CB_QUEEN:
+                str_queens[ind_queens++] = out;
+            break;
+            case CB_KING:
+                str_kings[ind_kings++] = out;
+            break;
+            default:
+                continue;
+        }
+    }
+
+    // Header file writing
+    res = fputs(begin, file);
+    savecheck;
+    
+    for(ui8 I = 0; I < 4; I++) {
+        res = fputc(attr[I], file);
+        savecheck;
+    }
+
+    // Body file writing
+    if(ind_pawns > 1) {
+        res = fputs(str_pawns, file);
+        savecheck;
+    }
+    
+    if(ind_rooks > 1) {
+        res = fputs(str_rooks, file);
+        savecheck;
+    }
+    
+    if(ind_knights > 1) {
+        res = fputs(str_knights, file);
+        savecheck;
+    }
+    
+    if(ind_bishops > 1) {
+        res = fputs(str_bishops, file);
+        savecheck;
+    }
+    
+    if(ind_queens > 1) {
+        res = fputs(str_queens, file);
+        savecheck;
+    }
+    
+    if(ind_kings > 1) {
+        res = fputs(str_kings, file);
+        savecheck;
+    }
+
+    // Exit code '\1'
+    fputc(1, file);
+    savecheck;
+
+    return (fclose(file) == 0);
 }
 
 /** @fn ui8 Tool_Match(char *literal, const char *match, long at)
@@ -80,12 +281,18 @@ ui8 VER1_0_1(Board_t *orig_brd, char *str)
 {
     //Intermediate storage in case of mishaps
     Board_t board;
-    Board_clone(&board, *orig_brd);
+
+    //Set board content to empty
+    for(ui8 f = 0; f < 8; f++) for(ui8 r = 0; r < 8; r++) {
+        board.content[f][r] = CB_EMPTY;
+    }
 
     /*
      * ATTRIBUTE FORMATING FOR 1.0.1:
      * ABBC CDDD
      * DEFF 0000
+     * TTTT TTTT
+     * TTTT TTTT
      * 
      * A - Allow default special move flag
      * B - Queen's side castling info
@@ -93,6 +300,7 @@ ui8 VER1_0_1(Board_t *orig_brd, char *str)
      * D - Peasant File info
      * E - Turn flag, 0 = white, 1 = black
      * F - Win, 0 = ongoing game, 1 = white, 2 = black, 3 = draw
+     * T - Turn counter number
      */
     long attributes_index = 11;
 
@@ -102,6 +310,7 @@ ui8 VER1_0_1(Board_t *orig_brd, char *str)
     board.META_PASSANT_FILE = ((str[attributes_index] << 1) & 0x0Eu) | ((str[attributes_index + 1] >> 7) & 0x01u);
     board.turn = (str[attributes_index + 1] >> 6) & 0x01u;
     board.win = (str[attributes_index + 1] >> 4) & 0x03u;
+    board.turn_nr = (((__UINT16_TYPE__) str[attributes_index + 2]) << 8) | ((__UINT16_TYPE__) str[attributes_index + 3]);
 
     /*
      * CONTENT FORMATTING FOR 1.0.1:
@@ -118,7 +327,7 @@ ui8 VER1_0_1(Board_t *orig_brd, char *str)
      * 11PP PPPP  ->  Set piece ID
      * 00-- ----  ->  Exit
      */
-    long content_index = 13;
+    long content_index = 15;
     unsigned char current;
     unsigned char valid_load = 0;
     unsigned char sel_piece = CB_KING;

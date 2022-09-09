@@ -13,7 +13,7 @@ RELEASE_DIR := release
 LIBRARIES_INCLUDE := 
 
 # SRC List
-SRCS := board.c main.c
+SRCS := board.c board_file_handle.c main.c
 
 # OBJ List
 OBJS_WIN := $(SRCS:%=$(BUILD_DIR)/$(WIN_DIR)/%.o)

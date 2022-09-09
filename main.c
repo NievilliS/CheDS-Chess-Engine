@@ -78,16 +78,14 @@ int main() {
     Board_init(&board);BoardMove_t m;pout(board);
 
     ui8 ret;
-    unsigned int ct = 1;
-    ui8 vl = 1;
 
     #define bufmax 200
     char buf[bufmax] = {0};
 
     while(buf[0] != 'x' && buf[0] != 'X') {
         printf("\n> ");
-        if(vl)
-            printf("%u.", ct);
+        if((board.turn_nr % 2) == 0)
+            printf("%u.", 1 + (board.turn_nr / 2));
         scanf("%s", buf);
 
         if(buf[0] == 'x' || buf[0] == 'X') {
@@ -100,7 +98,34 @@ int main() {
         }
 
         if(buf[0] == 'y' || buf[0] == 'Y') {
-            Board_init(&board);ct=1;vl=1;pout(board);
+            Board_init(&board);pout(board);
+            continue;
+        }
+
+        if(buf[0] == 's' || buf[0] == 'S') {
+            printf("Save Path: ");
+            char path[260] = {0};
+            scanf("%s", path);
+
+            if(Board_save_to_file(board, path)) {
+                printf("\n -> Saved to %s! \n\n", path);
+                continue;
+            }
+            printf("\n -> Error on saving file! \n\n");
+            continue;
+        }
+
+        if(buf[0] == 'l' || buf[0] == 'L') {
+            printf("Load Path: ");
+            char path[260] = {0};
+            scanf("%s", path);
+            
+            if(Board_load_from_file(&board, path)) {
+                printf("\n -> Loaded from %s! \n\n", path);
+                pout(board);
+                continue;
+            }
+            printf("\n -> Error on loading file! \n\n");
             continue;
         }
 
@@ -137,9 +162,6 @@ int main() {
         }if(ret == 127) {
             printf("\n ==========\n=== DRAW ===\n ==========\n");
         }
-
-        if(board.turn == CB_TURN_WHITE && !vl) ct++;
-        vl = board.turn == CB_TURN_WHITE;
 
         pout(board);
     }

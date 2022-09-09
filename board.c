@@ -75,6 +75,7 @@ void Board_init_default(Board_t *board) {
     board->META_CASTLE_A = 3;
     board->META_CASTLE_H = 3;
     board->win = 0;
+    board->turn_nr = 0;
 }
 
 /** @fn ui8 Board_legal_move(Board_t, BoardMove_t)
@@ -452,8 +453,9 @@ ui8 Board_apply(Board_t *board, BoardMove_t move) {
         Board_clone(board, backup);                                                                     \
         return 0;                                                                                       \
     }                                                                                                   \
-    /* Swap turn */                                                                                     \
+    /* Swap and count turn */                                                                           \
     board->turn = (board->turn == CB_TURN_WHITE) ? CB_TURN_BLACK : CB_TURN_WHITE;                       \
+    board->turn_nr++;                                                                                   \
     /* Check for checkmate */                                                                           \
     if(Board_in_mate(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {                                 \
         board->win = ((board->turn == CB_TURN_WHITE) ? 2 : 1);                                          \
@@ -664,6 +666,7 @@ void Board_clone(Board_t *into, Board_t from) {
     into->win = from.win;
     into->META_CASTLE_A = from.META_CASTLE_A;
     into->CB_ALLOW_DEFAULT_SPM = from.CB_ALLOW_DEFAULT_SPM;
+    into->turn_nr = from.turn_nr;
 }
 
 /** @fn ui8 Tool_Expression_Match(char *literal, char *match)
