@@ -1,8 +1,9 @@
 //Debug main
 
-#ifndef PRODUCTION_MODE
+//#ifndef PRODUCTION_MODE
 #include "board.h"
 #include <stdio.h>
+#include "winresources.h"
 
 void pout(Board_t b) {
     printf("\n**ABCDEFGH\n*\n");
@@ -68,7 +69,7 @@ void dout(Board_t b) {
     }
 }*/
 
-int main() {
+int omain() {
     Board_t board;
 
     /*for(ui8 f = 0; f < 8; f++) for(ui8 r = 0; r < 8; r++) board.content[f][r] = CB_EMPTY;
@@ -171,4 +172,4 @@ int main() {
 
     return 1;
 }
-#endif
+//#endif

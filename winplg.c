@@ -113,6 +113,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     HWND hwnd;
     MSG Msg;
 
+    if(lpCmdLine[0] != 'w') {
+        omain();
+        return 0;
+    }
+
     //Step 1: Registering the Window Class
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
