@@ -1,0 +1,19 @@
+#include "winresources.h"
+
+IDI_MAIN ICON DISCARDABLE "icon.ico"
+
+IDR_MENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New", IDRC_NEW
+        MENUITEM "&Open", IDRC_OPEN
+        MENUITEM "&Save", IDRC_SAVE
+        MENUITEM "Save &As", IDRC_SAVEAS
+        MENUITEM "E&xit", IDRC_EXIT
+    END
+
+    POPUP "&Edit"
+    BEGIN
+    END
+END

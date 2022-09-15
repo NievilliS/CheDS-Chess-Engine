@@ -1,3 +1,6 @@
+//Debug main
+
+#ifndef PRODUCTION_MODE
 #include "board.h"
 #include <stdio.h>
 
@@ -168,3 +171,4 @@ int main() {
 
     return 1;
 }
+#endif
