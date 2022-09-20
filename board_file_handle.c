@@ -37,7 +37,7 @@ ui8 Board_load_from_string(Board_t *board, char *str)
     unsigned char VLEN = str[5];
 
     if(VLEN == 5) {
-        if(Tool_Match(str, "1.0.1", 6))
+        if(Tool_Match(str, "1.0.", 6))
             return VER1_0_1(board, str);
     }
 
@@ -121,7 +121,7 @@ ui8 Board_save_to_file(Board_t board, char *path)
         return 0
 
     // Values
-    const char *begin = "CHEDS" "\5" "1.0.1";
+    const char *begin = CB_CURRENT_FILE_HEADER;
 
     const unsigned char attr[4] = {
         ((board.CB_ALLOW_DEFAULT_SPM & 0x01u) << 7) |

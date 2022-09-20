@@ -47,6 +47,9 @@
 
     #define CB_SET_CONTENT(color, piece, file, rank) ->content CB_INDEX(file, rank) = ((CB_ ## piece) | (CB_ ## color ## _MASK))    /* e.g. CB_SET_CONTENT(WHITE, ROOK, A, 1) */
 
+    /***** META *****/
+    #define CB_CURRENT_FILE_HEADER "CHEDS" "\5" "1.0.2"
+
     /***** GLOBAL TYPES, VARS *****/
     typedef char ui8;                          /* uint8_t */
 
@@ -69,6 +72,13 @@
         ui8 special;                 /* 0 = none || 1 = capture minus file || 2 = capture plus file */
     } BoardMove_t;
 
+    //temporary
+    // Dynamic list
+    typedef struct dynl_s {
+        Board_t *b;
+        struct dynl_s *n;
+    } dynl_t;
+
     /***** GLOBAL METHOD DECLARATIONS *****/
     void Board_init_default(Board_t *);                                 /* Default board placement initializer */
     void Board_init(Board_t *);                                         /* This gets called in main though */
@@ -82,6 +92,7 @@
     ui8 Board_in_check(Board_t, ui8);                                   /* Checks of the color is in check */
     void Board_clone(Board_t *, Board_t);                               /* Clones */
     ui8 Board_in_mate(Board_t, ui8);                                    /* Evaluates if the game is lost */
+    ui8 Board_in_stale(Board_t, ui8);                                   /* Evaluates if the game is in draw */
 
     /***** GLOBAL FILE HANDLE DECLARATIONS *****/
     ui8 Board_load_from_string(Board_t *, char *);                      /* Load a board from cstring */

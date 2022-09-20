@@ -19,9 +19,16 @@ You will come across fields that have capital P and lower-case p, which is alway
 ## Console syntax
 In order to be able to do anything, you need the console syntax:
 
+- ? - h - print help
 - x - exit application
 - p - printout board
-- y - reset board
+- res - reset board
+- clr - clear board to empty
+- sa path - save board to path
+- lo path - load board from path
+- un - undo latest moves
+- edit (f)(r)(c)(p) - edit board customly
+(example: edit f5wp -> sets f5 to white queen, edit h1 -> sets h1 to empty)
 
 ## Chess move notation
 But that's not all. You will have to use Chess Algebraic Notation, which is more deeply described in https://en.wikipedia.org/wiki/Algebraic_notation_(chess) .

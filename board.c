@@ -15,6 +15,8 @@
 #include <math.h>
 
 /***** FUNCTIONALITY *****/
+// This flag is required to prevent stalemate loops
+static volatile int stalemate_check_flag = 0;
 
 /** @fn void Board_init(Board_t *board)
  * @brief This gets called to initialize the board
@@ -412,12 +414,24 @@ ui8 Board_defended_field(Board_t board, ui8 file, ui8 rank) {
 		else if(board.content[f][r] != CB_EMPTY) {
 			move.from_file = f;
 			move.from_rank = r;
-			if(Board_legal_move(board, move)) {
-				if(Board_color_field(board, f, r) == 1)
-					ret |= 2;
-				else
-					ret |= 1;
+            // This checks if a piece can move to a field.
+            // Pawns can move forward which used to cause the king to be unable to move infront of the enemy pawn.
+            // This check will require pawn checks to be 2 (capture)
+            ui8 st = Board_legal_move(board, move);
+            if((board.content[f][r] & ~(CB_WHITE_MASK | CB_BLACK_MASK)) != CB_PAWN) {
+                if(st == 1) {
+                    if(Board_color_field(board, f, r) == 1)
+                        ret |= 2;
+                    else
+                        ret |= 1;
+                }
 			}
+            else if(st == 2) {
+                if(Board_color_field(board, f, r) == 1)
+                    ret |= 2;
+                else
+                    ret |= 1;
+            }
 		}
 	}
 
@@ -461,9 +475,11 @@ ui8 Board_apply(Board_t *board, BoardMove_t move) {
         board->win = ((board->turn == CB_TURN_WHITE) ? 2 : 1);                                          \
         return ((board->turn == CB_TURN_WHITE) ? 126u : 125u);                                          \
     }                                                                                                   \
-    /* TODO: To check for stalemate                                                                     \
-    if(Board_in_stale(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {}                               \
-    */                                                                                                  \
+    /* Check for stalemate */                                                                           \
+    if(!stalemate_check_flag && Board_in_stale(*board, (board->turn == CB_TURN_WHITE) ? 1 : 2)) {       \
+        board->win = 3;                                                                                 \
+        return 127u;                                                                                    \
+    }                                                                                                   \
     return
 
     Board_t backup;
@@ -615,7 +631,7 @@ ui8 Board_in_check(Board_t board, ui8 color) {
     for(ui8 r = 0; r < 8; r++) for(ui8 f = 0; f < 8; f++) {
         move.from_file = f;
         move.from_rank = r;
-        if(Board_legal_move(board, move) == 2)
+        if(board.content[f][r] != CB_EMPTY, Board_legal_move(board, move) == 2)
             return 1;
     }
     return 0;
@@ -641,6 +657,9 @@ ui8 Board_in_mate(Board_t board, ui8 color) {
     for(move.from_rank = 0; move.from_rank < 8; move.from_rank++)
     for(move.to_file = 0; move.to_file < 8; move.to_file++)
     for(move.to_rank = 0; move.to_rank < 8; move.to_rank++) {
+        //Prevent overload
+        if(board.content[move.from_file][move.from_rank] == CB_EMPTY)
+            continue;
         //Upon legal move
         ui8 ret = Board_apply(&check, move);
         if(!(ret == 0 || ret == 3 || ret == 4)) {
@@ -649,6 +668,43 @@ ui8 Board_in_mate(Board_t board, ui8 color) {
         }
     }
     
+    return 1;
+}
+
+/** @fn ui8 Board_in_stale(Board_t board, ui8 color)
+ * @brief Gets if a color is in stalemates
+ * @param board To be checked
+ * @param color 1 = white, 2 = black
+ * @returns 1 = in stalemate || 0 = not
+ */
+ui8 Board_in_stale(Board_t board, ui8 color) {
+    if(Board_in_check(board, color))
+        return 0;
+
+    Board_t check;
+    Board_clone(&check, board);
+
+    //Check every piece and every move
+    BoardMove_t move;
+
+    stalemate_check_flag = 1;
+    for(move.from_file = 0; move.from_file < 8; move.from_file++)
+    for(move.from_rank = 0; move.from_rank < 8; move.from_rank++)
+    for(move.to_file = 0; move.to_file < 8; move.to_file++)
+    for(move.to_rank = 0; move.to_rank < 8; move.to_rank++) {
+        //Prevent overload
+        if(board.content[move.from_file][move.from_rank] == CB_EMPTY)
+            continue;
+        //Upon legal move
+        ui8 ret = Board_apply(&check, move);
+        if(!(ret == 0 || ret == 3 || ret == 4)) {
+            //printf("\n<%i,%i,%i,%i>\n", move.from_file, move.from_rank, move.to_file, move.to_rank);
+            stalemate_check_flag = 0;
+            return 0;
+        }
+    }
+    
+    stalemate_check_flag = 0;
     return 1;
 }
 
